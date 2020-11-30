@@ -1,6 +1,6 @@
 # Environment Variables
 
-Appwrite environment variables allow you to edit your server setup configuration and customize it. You can easily change the environment variables by changing them when running Appwrite using Docker CLI or Docker-Compose.
+Appwrite environment variables allow you to edit your server setup configuration and customize it. You can change the environment variables by changing them when running Appwrite using Docker CLI or Docker-Compose.
 
 ## General Options
 
@@ -10,7 +10,11 @@ Set your server running environment. By default, the var is set to 'development'
 
 ### _APP_OPTIONS_ABUSE
 
-Allows you to disable abuse checks and API rate limiting. By default, set to 'enabled'. To cancel the abuse checking, set to 'disabled'. It is not recommended to disable this check-in a production environment.
+Allows you to turn off abuse checks and API rate limiting. By default, set to 'enabled'. To cancel the abuse checking, set to 'disabled'. It is not recommended to turn off this feature in a production environment.
+
+### _APP_OPTIONS_FORCE_HTTPS
+
+Allows you to force HTTPS connection to your API. This feature redirects any HTTP call to HTTPS and adds the 'Strict-Transport-Security' header to all HTTP responses. By default, set to 'disabled'. To enable, set to 'enabled'. This feature will work only when your ports are set to default 80 and 443.
 
 ### _APP_OPENSSL_KEY_V1
 
@@ -18,21 +22,25 @@ This is your server private secret key that is used to encrypt all sensitive dat
 
 ### _APP_STORAGE_LIMIT
 
-Maximun file size allowed for file upload. The deafult value is 100MB limitation. You should pass your size limit value in bytes.
+Maximum file size allowed for file upload. The default value is 100MB limitation. You should pass your size limit value in bytes.
+
+### _APP_STORAGE_ANTIVIRUS
+
+This variable allows you to disable the internal anti-virus scans. This value is set to 'enabled' by default, to cancel the scans set the value to 'disabled'. When disabled, it's recommended to turn off the ClamAV container for better resource usage.
 
 ### _APP_CONSOLE_WHITELIST_EMAILS
 
-This option is very useful for small teams or sole developers. To enable it, pass a list of allowed email addresses separated by a comma.
+This option allows you to limit creation of users to Appwrite console. This option is very useful for small teams or sole developers. To enable it, pass a list of allowed email addresses separated by a comma.
 
 ### _APP_CONSOLE_WHITELIST_DOMAINS
 
-This option allows you to restrict access to Appwrite console for users sharing the same email domains. This option is very useful for team working with company emails domain.
+This option allows you to limit creation of users to Appwrite console for users sharing the same email domains. This option is very useful for team working with company emails domain.
 
 To enable this option, pass a list of allowed email domains separated by a comma.
 
 ### _APP_CONSOLE_WHITELIST_IPS
 
-This last option allows you to restrict creation of users in Appwrite console for users sharing the same set of IP addresses. This option is very useful for team working with a VPN service or a company IP.
+This last option allows you to limit creation of users in Appwrite console for users sharing the same set of IP addresses. This option is very useful for team working with a VPN service or a company IP.
 
 To enable/activate this option, pass a list of allowed IP addresses separated by a comma.
 
@@ -88,11 +96,11 @@ InfluxDB server TCP port. Default value is: '8086'
 
 Appwrite uses a StatsD server for aggregating and sending stats data over a fast UDP connection. The StatsD env vars are used to allow Appwrite server to connect to the StatsD container.
 
-### _APP_INFLUXDB_HOST
+### _APP_STATSD_HOST
 
 StatsD server host name address. Default value is: 'telegraf'
 
-### _APP_INFLUXDB_PORT
+### _APP_STATSD_PORT
 
 StatsD server TCP port. Default value is: '8125'
 

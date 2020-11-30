@@ -17,20 +17,29 @@ class Avatars extends Service {
      /// /account/sessions endpoint. Use width, height and quality arguments to
      /// change the output settings.
      ///
-    Future<Response> getBrowser({@required String code, int width = 100, int height = 100, int quality = 100}) {
+    String getBrowser({@required String code, int width = 100, int height = 100, int quality = 100}) {
         final String path = '/avatars/browsers/{code}'.replaceAll(RegExp('{code}'), code);
 
         final Map<String, dynamic> params = {
             'width': width,
             'height': height,
             'quality': quality,
+            'project': client.config['project'],
         };
 
-        final Map<String, String> headers = {
-            'content-type': 'application/json',
-        };
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
+        Uri endpoint = Uri.parse(client.endPoint);
+        Uri location = new Uri(scheme: endpoint.scheme,
+          host: endpoint.host,
+          port: endpoint.port,
+          path: endpoint.path + path,
+          queryParameters:params,
+        );
 
-        return client.call(HttpMethod.get, path: path, params: params, headers: headers);
+        return location.toString();
     }
 
      /// Get Credit Card Icon
@@ -50,15 +59,19 @@ class Avatars extends Service {
             'project': client.config['project'],
         };
 
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
         Uri endpoint = Uri.parse(client.endPoint);
-        Uri url = new Uri(scheme: endpoint.scheme,
+        Uri location = new Uri(scheme: endpoint.scheme,
           host: endpoint.host,
           port: endpoint.port,
           path: endpoint.path + path,
           queryParameters:params,
         );
 
-        return url.toString();
+        return location.toString();
     }
 
      /// Get Favicon
@@ -74,15 +87,19 @@ class Avatars extends Service {
             'project': client.config['project'],
         };
 
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
         Uri endpoint = Uri.parse(client.endPoint);
-        Uri url = new Uri(scheme: endpoint.scheme,
+        Uri location = new Uri(scheme: endpoint.scheme,
           host: endpoint.host,
           port: endpoint.port,
           path: endpoint.path + path,
           queryParameters:params,
         );
 
-        return url.toString();
+        return location.toString();
     }
 
      /// Get Country Flag
@@ -101,15 +118,19 @@ class Avatars extends Service {
             'project': client.config['project'],
         };
 
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
         Uri endpoint = Uri.parse(client.endPoint);
-        Uri url = new Uri(scheme: endpoint.scheme,
+        Uri location = new Uri(scheme: endpoint.scheme,
           host: endpoint.host,
           port: endpoint.port,
           path: endpoint.path + path,
           queryParameters:params,
         );
 
-        return url.toString();
+        return location.toString();
     }
 
      /// Get Image from URL
@@ -129,15 +150,55 @@ class Avatars extends Service {
             'project': client.config['project'],
         };
 
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
         Uri endpoint = Uri.parse(client.endPoint);
-        Uri url = new Uri(scheme: endpoint.scheme,
+        Uri location = new Uri(scheme: endpoint.scheme,
           host: endpoint.host,
           port: endpoint.port,
           path: endpoint.path + path,
           queryParameters:params,
         );
 
-        return url.toString();
+        return location.toString();
+    }
+
+     /// Get User Initials
+     ///
+     /// Use this endpoint to show your user initials avatar icon on your website or
+     /// app. By default, this route will try to print your logged-in user name or
+     /// email initials. You can also overwrite the user name if you pass the 'name'
+     /// parameter. If no name is given and no user is logged, an empty avatar will
+     /// be returned.
+     /// 
+     /// You can use the color and background params to change the avatar colors. By
+     /// default, a random theme will be selected. The random theme will persist for
+     /// the user's initials when reloading the same theme will always return for
+     /// the same initials.
+     ///
+    String getInitials({String name = '', int width = 500, int height = 500, String color = '', String background = ''}) {
+        final String path = '/avatars/initials';
+
+        final Map<String, dynamic> params = {
+            'name': name,
+            'width': width,
+            'height': height,
+            'color': color,
+            'background': background,
+            'project': client.config['project'],
+        };
+
+        Uri endpoint = Uri.parse(client.endPoint);
+        Uri location = new Uri(scheme: endpoint.scheme,
+          host: endpoint.host,
+          port: endpoint.port,
+          path: endpoint.path + path,
+          queryParameters:params,
+        );
+
+        return location.toString();
     }
 
      /// Get QR Code
@@ -156,14 +217,18 @@ class Avatars extends Service {
             'project': client.config['project'],
         };
 
+        params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+          params[key] = params[key].toString();
+        }});
+        
         Uri endpoint = Uri.parse(client.endPoint);
-        Uri url = new Uri(scheme: endpoint.scheme,
+        Uri location = new Uri(scheme: endpoint.scheme,
           host: endpoint.host,
           port: endpoint.port,
           path: endpoint.path + path,
           queryParameters:params,
         );
 
-        return url.toString();
+        return location.toString();
     }
 }

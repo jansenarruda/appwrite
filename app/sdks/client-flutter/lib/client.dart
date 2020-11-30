@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dio/adapter.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -15,22 +16,26 @@ class Client {
     Map<String, String> headers;
     Map<String, String> config;
     bool selfSigned;
-    bool init = false;
+    bool initialized = false;
     Dio http;
     PersistCookieJar cookieJar;
 
     Client({this.endPoint = 'https://appwrite.io/v1', this.selfSigned = false, Dio http}) : this.http = http ?? Dio() {
-        
-        type = (Platform.isIOS) ? 'ios' : type;
-        type = (Platform.isMacOS) ? 'macos' : type;
-        type = (Platform.isAndroid) ? 'android' : type;
-        type = (Platform.isLinux) ? 'linux' : type;
-        type = (Platform.isWindows) ? 'windows' : type;
-        type = (Platform.isFuchsia) ? 'fuchsia' : type;
+        // Platform is not supported in web so if web, set type to web automatically and skip Platform check
+        if(kIsWeb) {
+            type = 'web';
+        }else{
+            type = (Platform.isIOS) ? 'ios' : type;
+            type = (Platform.isMacOS) ? 'macos' : type;
+            type = (Platform.isAndroid) ? 'android' : type;
+            type = (Platform.isLinux) ? 'linux' : type;
+            type = (Platform.isWindows) ? 'windows' : type;
+            type = (Platform.isFuchsia) ? 'fuchsia' : type;
+        }
         
         this.headers = {
             'content-type': 'application/json',
-            'x-sdk-version': 'appwrite:dart:0.2.1',
+            'x-sdk-version': 'appwrite:flutter:0.3.0-dev.1',
         };
 
         this.config = {};
@@ -76,6 +81,25 @@ class Client {
         return this;
     }
 
+    Future init() async {
+        if(!initialized) {
+          // if web skip cookie implementation and origin header as those are automatically handled by browsers
+          if(!kIsWeb) {
+            final Directory cookieDir = await _getCookiePath();
+            cookieJar = new PersistCookieJar(dir:cookieDir.path);
+            this.http.interceptors.add(CookieManager(cookieJar));
+            PackageInfo packageInfo = await PackageInfo.fromPlatform();
+            addHeader('Origin', 'appwrite-' + type + '://' + packageInfo.packageName);
+          }else{
+            // if web set httpClientAdapter as BrowserHttpClientAdapter with withCredentials true to make cookies work
+            this.http.options.extra['withCredentials'] = true;
+          }
+
+          this.http.options.baseUrl = this.endPoint;
+          this.http.options.validateStatus = (status) => status < 400;
+        }
+    }
+
     Future<Response> call(HttpMethod method, {String path = '', Map<String, String> headers = const {}, Map<String, dynamic> params = const {}}) async {
         if(selfSigned) {
             // Allow self signed requests
@@ -85,21 +109,7 @@ class Client {
             };
         }
 
-        if(!init) {
-            final Directory cookieDir = await _getCookiePath();
-
-            cookieJar = new PersistCookieJar(dir:cookieDir.path);
-
-            this.http.options.baseUrl = this.endPoint;
-            this.http.options.validateStatus = (status) => status < 400;
-            this.http.interceptors.add(CookieManager(cookieJar));
-
-            PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-            addHeader('Origin', 'appwrite-' + type + '://' + packageInfo.packageName);
-
-            init = true;
-        }
+        await this.init();
 
         // Origin is hardcoded for testing
         Options options = Options(
@@ -112,6 +122,10 @@ class Client {
         }
 
         if (method == HttpMethod.get) {
+            params.keys.forEach((key) {if (params[key] is int || params[key] is double) {
+              params[key] = params[key].toString();
+            }});
+            
             return http.get(path, queryParameters: params, options: options);
         } else {
             return http.request(path, data: params, options: options);

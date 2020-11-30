@@ -11,24 +11,13 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 $path = (isset($_GET['q'])) ? explode('/', $_GET['q']) : [];
-$domain = (isset($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : '';
 
 array_shift($path);
 $version = array_shift($path);
 
-switch ($version) { // Switch between API version
-    case 'v1':
-        $service = $version . '/' . array_shift($path);
-        include __DIR__ . '/../app/app.php';
-    break;
-    case 'console':
-        default:
-        $service = $version . '/';
-        include __DIR__ . '/../app/app.php';
-        break;
-}
+include __DIR__ . '/../app/app.php';
