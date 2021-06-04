@@ -37,11 +37,11 @@ class Domain extends Validator
      */
     public function isValid($value)
     {
-        if(empty($value)) {
+        if (empty($value)) {
             return false;
         }
 
-        if(!is_string($value)) {
+        if (!is_string($value)) {
             return false;
         }
 
@@ -50,5 +50,29 @@ class Domain extends Validator
         }
 
         return true;
+    }
+
+    /**
+     * Is array
+     *
+     * Function will return true if object is array.
+     *
+     * @return bool
+     */
+    public function isArray(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get Type
+     *
+     * Returns validator type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return self::TYPE_STRING;
     }
 }

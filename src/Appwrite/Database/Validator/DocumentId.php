@@ -16,7 +16,7 @@ class DocumentId extends Validator
     /**
      * @var Database
      */
-    protected $database = null;
+    protected $database;
 
     /**
      * @var string
@@ -77,5 +77,29 @@ class DocumentId extends Validator
         }
 
         return true;
+    }
+    
+    /**
+     * Is array
+     *
+     * Function will return true if object is array.
+     *
+     * @return bool
+     */
+    public function isArray(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get Type
+     *
+     * Returns validator type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return self::TYPE_STRING;
     }
 }

@@ -156,6 +156,7 @@ class Client
      */
     public function call(string $method, string $path = '', array $headers = [], array $params = [])
     {
+        usleep(50000);
         $headers            = array_merge($this->headers, $headers);
         $ch                 = curl_init($this->endpoint . $path . (($method == self::METHOD_GET && !empty($params)) ? '?' . http_build_query($params) : ''));
         $responseHeaders    = [];
@@ -187,6 +188,8 @@ class Client
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36');
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0); 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$responseHeaders) {
             $len = strlen($header);
             $header = explode(':', $header, 2);
@@ -211,14 +214,14 @@ class Client
         }
 
         $responseBody   = curl_exec($ch);
-        $responseType   = (isset($responseHeaders['content-type'])) ? $responseHeaders['content-type'] : '';
+        $responseType   = $responseHeaders['content-type'] ?? '';
         $responseStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         switch (substr($responseType, 0, strpos($responseType, ';'))) {
             case 'application/json':
                 $json = json_decode($responseBody, true);
 
-                if($json === null) {
+                if ($json === null) {
                     throw new Exception('Failed to parse response: '.$responseBody);
                 }
 
@@ -235,8 +238,8 @@ class Client
 
         $responseHeaders['status-code'] = $responseStatus;
 
-        if($responseStatus === 500) {
-            echo 'Server error(!): '.json_encode($responseBody)."\n";
+        if ($responseStatus === 500) {
+            echo 'Server error('.$method.': '.$path.'. Params: '.json_encode($params).'): '.json_encode($responseBody)."\n";
         }
 
         return [

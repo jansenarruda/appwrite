@@ -93,12 +93,16 @@ class Origin extends Validator
      * Check if Origin has been whiltlisted
      *  for access to the API
      *
-     * @param string $origin
+     * @param mixed $origin
      *
      * @return bool
      */
     public function isValid($origin)
     {
+        if (!is_string($origin)) {
+            return false;
+        }
+
         $scheme = \parse_url($origin, PHP_URL_SCHEME);
         $host = \parse_url($origin, PHP_URL_HOST);
 
@@ -114,5 +118,29 @@ class Origin extends Validator
         }
 
         return false;
+    }
+
+    /**
+     * Is array
+     *
+     * Function will return true if object is array.
+     *
+     * @return bool
+     */
+    public function isArray(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get Type
+     *
+     * Returns validator type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return self::TYPE_STRING;
     }
 }

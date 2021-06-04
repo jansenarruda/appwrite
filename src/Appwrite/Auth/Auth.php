@@ -16,22 +16,28 @@ class Auth
     /**
      * User Roles.
      */
-    const USER_ROLE_GUEST = 0;
-    const USER_ROLE_MEMBER = 1;
-    const USER_ROLE_ADMIN = 2;
-    const USER_ROLE_DEVELOPER = 3;
-    const USER_ROLE_OWNER = 4;
-    const USER_ROLE_APP = 5;
-    const USER_ROLE_SYSTEM = 6;
+    const USER_ROLE_GUEST = 'guest';
+    const USER_ROLE_MEMBER = 'member';
+    const USER_ROLE_ADMIN = 'admin';
+    const USER_ROLE_DEVELOPER = 'developer';
+    const USER_ROLE_OWNER = 'owner';
+    const USER_ROLE_APP = 'app';
+    const USER_ROLE_SYSTEM = 'system';
     const USER_ROLE_ALL = '*';
 
     /**
      * Token Types.
      */
-    const TOKEN_TYPE_LOGIN = 1;
+    const TOKEN_TYPE_LOGIN = 1; // Deprecated
     const TOKEN_TYPE_VERIFICATION = 2;
     const TOKEN_TYPE_RECOVERY = 3;
     const TOKEN_TYPE_INVITE = 4;
+
+    /**
+     * Session Providers.
+     */
+    const SESSION_PROVIDER_EMAIL = 'email';
+    const SESSION_PROVIDER_ANONYMOUS = 'anonymous';
 
     /**
      * Token Expiration times.
@@ -49,9 +55,9 @@ class Auth
     /**
      * User Unique ID.
      *
-     * @var int
+     * @var string
      */
-    public static $unique = 0;
+    public static $unique = '';
 
     /**
      * User Secret Key.
@@ -75,7 +81,7 @@ class Auth
     /**
      * Encode Session.
      *
-     * @param int    $id
+     * @param string $id
      * @param string $secret
      *
      * @return string
@@ -118,7 +124,7 @@ class Auth
      *
      * @return string
      */
-    public static function hash($string)
+    public static function hash(string $string)
     {
         return \hash('sha256', $string);
     }
@@ -130,7 +136,7 @@ class Auth
      *
      * @param $string
      *
-     * @return bool|string
+     * @return bool|string|null
      */
     public static function passwordHash($string)
     {
@@ -193,15 +199,74 @@ class Auth
      */
     public static function tokenVerify(array $tokens, int $type, string $secret)
     {
-        foreach ($tokens as $token) { /* @var $token Document */
-            if (isset($token['type']) &&
-               isset($token['secret']) &&
-               isset($token['expire']) &&
-               $token['type'] == $type &&
-               $token['secret'] === self::hash($secret) &&
-               $token['expire']  >= \time()) {
-                return $token->getId();
+        foreach ($tokens as $token) { /** @var Document $token */
+            if ($token->isSet('type') &&
+                $token->isSet('secret') &&
+                $token->isSet('expire') &&
+                $token->getAttribute('type') == $type &&
+                $token->getAttribute('secret') === self::hash($secret) &&
+                $token->getAttribute('expire') >= \time()) {
+                return (string)$token->getId();
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Verify session and check that its not expired.
+     *
+     * @param array  $sessions
+     * @param string $secret
+     *
+     * @return bool|string
+     */
+    public static function sessionVerify(array $sessions, string $secret)
+    {
+        foreach ($sessions as $session) { /** @var Document $session */
+            if ($session->isSet('secret') &&
+                $session->isSet('expire') &&
+                $session->isSet('provider') &&
+                $session->getAttribute('secret') === self::hash($secret) &&
+                $session->getAttribute('expire') >= \time()) {
+                return (string)$session->getId();
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Is Previligged User?
+     * 
+     * @param array $roles
+     * 
+     * @return bool
+     */
+    public static function isPrivilegedUser(array $roles): bool
+    {
+        if(
+            array_key_exists('role:'.self::USER_ROLE_OWNER, $roles) ||
+            array_key_exists('role:'.self::USER_ROLE_DEVELOPER, $roles) ||
+            array_key_exists('role:'.self::USER_ROLE_ADMIN, $roles)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Is App User?
+     * 
+     * @param array $roles
+     * 
+     * @return bool
+     */
+    public static function isAppUser(array $roles): bool
+    {
+        if(array_key_exists('role:'.self::USER_ROLE_APP, $roles)) {
+            return true;
         }
 
         return false;

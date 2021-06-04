@@ -1,5 +1,7 @@
 <section class="zone medium">
     <form class="box margin-top-large"
+        data-analytics
+        data-analytics-activity
         data-analytics-event="submit"
         data-analytics-category="home"
         data-analytics-label="Update Team Membership Status"
@@ -7,7 +9,7 @@
         data-scope="console"
         data-event="submit"
         data-param-team-id="{{router.params.teamId}}"
-        data-param-invite-id="{{router.params.inviteId}}"
+        data-param-membership-id="{{router.params.membershipId}}"
         data-param-user-id="{{router.params.userId}}"
         data-param-secret="{{router.params.secret}}"
         data-success="redirect,alert,trigger"

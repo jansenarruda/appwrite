@@ -4,6 +4,7 @@ namespace Appwrite\Database\Validator;
 
 use Appwrite\Database\Database;
 use Appwrite\Database\Document;
+use Appwrite\Network\Validator as NetworkValidator;
 use Utopia\Validator;
 
 class Structure extends Validator
@@ -29,9 +30,9 @@ class Structure extends Validator
     protected $database;
 
     /**
-     * @var int
+     * @var string
      */
-    protected $id = null;
+    protected $id = '';
 
     /**
      * Basic rules to apply on all documents.
@@ -118,7 +119,7 @@ class Structure extends Validator
      *
      * Returns true if valid or false if not.
      *
-     * @param Document $document
+     * @param mixed $document
      *
      * @return bool
      */
@@ -156,9 +157,14 @@ class Structure extends Validator
 
         foreach ($array as $key => $value) {
             $rule = $collection->search('key', $key, $rules);
-            $ruleType = (isset($rule['type'])) ? $rule['type'] : '';
-            $ruleRequired = (isset($rule['required'])) ? $rule['required'] : true;
-            $ruleArray = (isset($rule['array'])) ? $rule['array'] : false;
+            
+            if (!$rule) {
+                continue;
+            }
+
+            $ruleType = $rule['type'] ?? '';
+            $ruleRequired = $rule['required'] ?? true;
+            $ruleArray = $rule['array'] ?? false;
             $validator = null;
 
             switch ($ruleType) {
@@ -182,16 +188,16 @@ class Structure extends Validator
                     $validator = new Validator\Boolean();
                     break;
                 case self::RULE_TYPE_EMAIL:
-                    $validator = new Validator\Email();
+                    $validator = new NetworkValidator\Email();
                     break;
                 case self::RULE_TYPE_URL:
-                    $validator = new Validator\URL();
+                    $validator = new NetworkValidator\URL();
                     break;
                 case self::RULE_TYPE_IP:
-                    $validator = new Validator\IP();
+                    $validator = new NetworkValidator\IP();
                     break;
                 case self::RULE_TYPE_WILDCARD:
-                    $validator = new Validator\Mock();
+                    $validator = new Validator\Wildcard();
                     break;
                 case self::RULE_TYPE_DOCUMENT:
                     $validator = new Collection($this->database, (isset($rule['list'])) ? $rule['list'] : []);
@@ -269,8 +275,39 @@ class Structure extends Validator
         return true;
     }
 
-    protected function getCollection($id)
+    /**
+     * Get Collection
+     * 
+     * Get Collection by unique ID
+     * 
+     * @return Document
+     */
+    protected function getCollection($id): Document
     {
         return $this->database->getDocument($id);
+    }
+
+    /**
+     * Is array
+     *
+     * Function will return true if object is array.
+     *
+     * @return bool
+     */
+    public function isArray(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get Type
+     *
+     * Returns validator type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return self::TYPE_OBJECT;
     }
 }

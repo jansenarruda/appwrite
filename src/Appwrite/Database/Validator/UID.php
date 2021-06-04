@@ -15,7 +15,7 @@ class UID extends Validator
      */
     public function getDescription()
     {
-        return 'Validate UUID format';
+        return 'Invalid UID format';
     }
 
     /**
@@ -23,16 +23,48 @@ class UID extends Validator
      *
      * Returns true if valid or false if not.
      *
-     * @param string $value
+     * @param mixed $value
      *
      * @return bool
      */
     public function isValid($value)
     {
-        if (\is_numeric($value)) {
-            //return false;
+        if ($value === 0) { // TODO Deprecate confition when we get the chance.
+            return true;
+        }
+
+        if (!is_string($value)) {
+            return false;
+        }
+        
+        if (mb_strlen($value) > 32) {
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * Is array
+     *
+     * Function will return true if object is array.
+     *
+     * @return bool
+     */
+    public function isArray(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get Type
+     *
+     * Returns validator type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return self::TYPE_STRING;
     }
 }
